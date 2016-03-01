@@ -1,0 +1,793 @@
+PACKAGE DOCUMENTATION
+
+package xlsx
+    import "."
+
+
+CONSTANTS
+
+const ColWidth = 9.5
+    Default column width in excel
+
+const MJD_0 float64 = 2400000.5
+
+const MJD_JD2000 float64 = 51544.5
+
+const TEMPLATE_DOCPROPS_APP = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties" xmlns:vt="http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes">
+  <TotalTime>0</TotalTime>
+  <Application>Go XLSX</Application>
+</Properties>`
+
+const TEMPLATE_DOCPROPS_CORE = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcmitype="http://purl.org/dc/dcmitype/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"></cp:coreProperties>`
+
+const TEMPLATE_XL_THEME_THEME = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<a:theme xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" name="Office-Design">
+  <a:themeElements>
+    <a:clrScheme name="Office">
+      <a:dk1>
+        <a:sysClr val="windowText" lastClr="000000"/>
+      </a:dk1>
+      <a:lt1>
+        <a:sysClr val="window" lastClr="FFFFFF"/>
+      </a:lt1>
+      <a:dk2>
+        <a:srgbClr val="1F497D"/>
+      </a:dk2>
+      <a:lt2>
+        <a:srgbClr val="EEECE1"/>
+      </a:lt2>
+      <a:accent1>
+        <a:srgbClr val="4F81BD"/>
+      </a:accent1>
+      <a:accent2>
+        <a:srgbClr val="C0504D"/>
+      </a:accent2>
+      <a:accent3>
+        <a:srgbClr val="9BBB59"/>
+      </a:accent3>
+      <a:accent4>
+        <a:srgbClr val="8064A2"/>
+      </a:accent4>
+      <a:accent5>
+        <a:srgbClr val="4BACC6"/>
+      </a:accent5>
+      <a:accent6>
+        <a:srgbClr val="F79646"/>
+      </a:accent6>
+      <a:hlink>
+        <a:srgbClr val="0000FF"/>
+      </a:hlink>
+      <a:folHlink>
+        <a:srgbClr val="800080"/>
+      </a:folHlink>
+    </a:clrScheme>
+    <a:fontScheme name="Office">
+      <a:majorFont>
+        <a:latin typeface="Cambria"/>
+        <a:ea typeface=""/>
+        <a:cs typeface=""/>
+        <a:font script="Jpan" typeface="ＭＳ Ｐゴシック"/>
+        <a:font script="Hang" typeface="맑은 고딕"/>
+        <a:font script="Hans" typeface="宋体"/>
+        <a:font script="Hant" typeface="新細明體"/>
+        <a:font script="Arab" typeface="Times New Roman"/>
+        <a:font script="Hebr" typeface="Times New Roman"/>
+        <a:font script="Thai" typeface="Tahoma"/>
+        <a:font script="Ethi" typeface="Nyala"/>
+        <a:font script="Beng" typeface="Vrinda"/>
+        <a:font script="Gujr" typeface="Shruti"/>
+        <a:font script="Khmr" typeface="MoolBoran"/>
+        <a:font script="Knda" typeface="Tunga"/>
+        <a:font script="Guru" typeface="Raavi"/>
+        <a:font script="Cans" typeface="Euphemia"/>
+        <a:font script="Cher" typeface="Plantagenet Cherokee"/>
+        <a:font script="Yiii" typeface="Microsoft Yi Baiti"/>
+        <a:font script="Tibt" typeface="Microsoft Himalaya"/>
+        <a:font script="Thaa" typeface="MV Boli"/>
+        <a:font script="Deva" typeface="Mangal"/>
+        <a:font script="Telu" typeface="Gautami"/>
+        <a:font script="Taml" typeface="Latha"/>
+        <a:font script="Syrc" typeface="Estrangelo Edessa"/>
+        <a:font script="Orya" typeface="Kalinga"/>
+        <a:font script="Mlym" typeface="Kartika"/>
+        <a:font script="Laoo" typeface="DokChampa"/>
+        <a:font script="Sinh" typeface="Iskoola Pota"/>
+        <a:font script="Mong" typeface="Mongolian Baiti"/>
+        <a:font script="Viet" typeface="Times New Roman"/>
+        <a:font script="Uigh" typeface="Microsoft Uighur"/>
+        <a:font script="Geor" typeface="Sylfaen"/>
+      </a:majorFont>
+      <a:minorFont>
+        <a:latin typeface="Calibri"/>
+        <a:ea typeface=""/>
+        <a:cs typeface=""/>
+        <a:font script="Jpan" typeface="ＭＳ Ｐゴシック"/>
+        <a:font script="Hang" typeface="맑은 고딕"/>
+        <a:font script="Hans" typeface="宋体"/>
+        <a:font script="Hant" typeface="新細明體"/>
+        <a:font script="Arab" typeface="Arial"/>
+        <a:font script="Hebr" typeface="Arial"/>
+        <a:font script="Thai" typeface="Tahoma"/>
+        <a:font script="Ethi" typeface="Nyala"/>
+        <a:font script="Beng" typeface="Vrinda"/>
+        <a:font script="Gujr" typeface="Shruti"/>
+        <a:font script="Khmr" typeface="DaunPenh"/>
+        <a:font script="Knda" typeface="Tunga"/>
+        <a:font script="Guru" typeface="Raavi"/>
+        <a:font script="Cans" typeface="Euphemia"/>
+        <a:font script="Cher" typeface="Plantagenet Cherokee"/>
+        <a:font script="Yiii" typeface="Microsoft Yi Baiti"/>
+        <a:font script="Tibt" typeface="Microsoft Himalaya"/>
+        <a:font script="Thaa" typeface="MV Boli"/>
+        <a:font script="Deva" typeface="Mangal"/>
+        <a:font script="Telu" typeface="Gautami"/>
+        <a:font script="Taml" typeface="Latha"/>
+        <a:font script="Syrc" typeface="Estrangelo Edessa"/>
+        <a:font script="Orya" typeface="Kalinga"/>
+        <a:font script="Mlym" typeface="Kartika"/>
+        <a:font script="Laoo" typeface="DokChampa"/>
+        <a:font script="Sinh" typeface="Iskoola Pota"/>
+        <a:font script="Mong" typeface="Mongolian Baiti"/>
+        <a:font script="Viet" typeface="Arial"/>
+        <a:font script="Uigh" typeface="Microsoft Uighur"/>
+        <a:font script="Geor" typeface="Sylfaen"/>
+      </a:minorFont>
+    </a:fontScheme>
+    <a:fmtScheme name="Office">
+      <a:fillStyleLst>
+        <a:solidFill>
+          <a:schemeClr val="phClr"/>
+        </a:solidFill>
+        <a:gradFill rotWithShape="1">
+          <a:gsLst>
+            <a:gs pos="0">
+              <a:schemeClr val="phClr">
+                <a:tint val="50000"/>
+                <a:satMod val="300000"/>
+              </a:schemeClr>
+            </a:gs>
+            <a:gs pos="35000">
+              <a:schemeClr val="phClr">
+                <a:tint val="37000"/>
+                <a:satMod val="300000"/>
+              </a:schemeClr>
+            </a:gs>
+            <a:gs pos="100000">
+              <a:schemeClr val="phClr">
+                <a:tint val="15000"/>
+                <a:satMod val="350000"/>
+              </a:schemeClr>
+            </a:gs>
+          </a:gsLst>
+          <a:lin ang="16200000" scaled="1"/>
+        </a:gradFill>
+        <a:gradFill rotWithShape="1">
+          <a:gsLst>
+            <a:gs pos="0">
+              <a:schemeClr val="phClr">
+                <a:tint val="100000"/>
+                <a:shade val="100000"/>
+                <a:satMod val="130000"/>
+              </a:schemeClr>
+            </a:gs>
+            <a:gs pos="100000">
+              <a:schemeClr val="phClr">
+                <a:tint val="50000"/>
+                <a:shade val="100000"/>
+                <a:satMod val="350000"/>
+              </a:schemeClr>
+            </a:gs>
+          </a:gsLst>
+          <a:lin ang="16200000" scaled="0"/>
+        </a:gradFill>
+      </a:fillStyleLst>
+      <a:lnStyleLst>
+        <a:ln w="9525" cap="flat" cmpd="sng" algn="ctr">
+          <a:solidFill>
+            <a:schemeClr val="phClr">
+              <a:shade val="95000"/>
+              <a:satMod val="105000"/>
+            </a:schemeClr>
+          </a:solidFill>
+          <a:prstDash val="solid"/>
+        </a:ln>
+        <a:ln w="25400" cap="flat" cmpd="sng" algn="ctr">
+          <a:solidFill>
+            <a:schemeClr val="phClr"/>
+          </a:solidFill>
+          <a:prstDash val="solid"/>
+        </a:ln>
+        <a:ln w="38100" cap="flat" cmpd="sng" algn="ctr">
+          <a:solidFill>
+            <a:schemeClr val="phClr"/>
+          </a:solidFill>
+          <a:prstDash val="solid"/>
+        </a:ln>
+      </a:lnStyleLst>
+      <a:effectStyleLst>
+        <a:effectStyle>
+          <a:effectLst>
+            <a:outerShdw blurRad="40000" dist="20000" dir="5400000" rotWithShape="0">
+              <a:srgbClr val="000000">
+                <a:alpha val="38000"/>
+              </a:srgbClr>
+            </a:outerShdw>
+          </a:effectLst>
+        </a:effectStyle>
+        <a:effectStyle>
+          <a:effectLst>
+            <a:outerShdw blurRad="40000" dist="23000" dir="5400000" rotWithShape="0">
+              <a:srgbClr val="000000">
+                <a:alpha val="35000"/>
+              </a:srgbClr>
+            </a:outerShdw>
+          </a:effectLst>
+        </a:effectStyle>
+        <a:effectStyle>
+          <a:effectLst>
+            <a:outerShdw blurRad="40000" dist="23000" dir="5400000" rotWithShape="0">
+              <a:srgbClr val="000000">
+                <a:alpha val="35000"/>
+              </a:srgbClr>
+            </a:outerShdw>
+          </a:effectLst>
+          <a:scene3d>
+            <a:camera prst="orthographicFront">
+              <a:rot lat="0" lon="0" rev="0"/>
+            </a:camera>
+            <a:lightRig rig="threePt" dir="t">
+              <a:rot lat="0" lon="0" rev="1200000"/>
+            </a:lightRig>
+          </a:scene3d>
+          <a:sp3d>
+            <a:bevelT w="63500" h="25400"/>
+          </a:sp3d>
+        </a:effectStyle>
+      </a:effectStyleLst>
+      <a:bgFillStyleLst>
+        <a:solidFill>
+          <a:schemeClr val="phClr"/>
+        </a:solidFill>
+        <a:gradFill rotWithShape="1">
+          <a:gsLst>
+            <a:gs pos="0">
+              <a:schemeClr val="phClr">
+                <a:tint val="40000"/>
+                <a:satMod val="350000"/>
+              </a:schemeClr>
+            </a:gs>
+            <a:gs pos="40000">
+              <a:schemeClr val="phClr">
+                <a:tint val="45000"/>
+                <a:shade val="99000"/>
+                <a:satMod val="350000"/>
+              </a:schemeClr>
+            </a:gs>
+            <a:gs pos="100000">
+              <a:schemeClr val="phClr">
+                <a:shade val="20000"/>
+                <a:satMod val="255000"/>
+              </a:schemeClr>
+            </a:gs>
+          </a:gsLst>
+          <a:path path="circle">
+            <a:fillToRect l="50000" t="-80000" r="50000" b="180000"/>
+          </a:path>
+        </a:gradFill>
+        <a:gradFill rotWithShape="1">
+          <a:gsLst>
+            <a:gs pos="0">
+              <a:schemeClr val="phClr">
+                <a:tint val="80000"/>
+                <a:satMod val="300000"/>
+              </a:schemeClr>
+            </a:gs>
+            <a:gs pos="100000">
+              <a:schemeClr val="phClr">
+                <a:shade val="30000"/>
+                <a:satMod val="200000"/>
+              </a:schemeClr>
+            </a:gs>
+          </a:gsLst>
+          <a:path path="circle">
+            <a:fillToRect l="50000" t="50000" r="50000" b="50000"/>
+          </a:path>
+        </a:gradFill>
+      </a:bgFillStyleLst>
+    </a:fmtScheme>
+  </a:themeElements>
+  <a:objectDefaults>
+    <a:spDef>
+      <a:spPr/>
+      <a:bodyPr/>
+      <a:lstStyle/>
+      <a:style>
+        <a:lnRef idx="1">
+          <a:schemeClr val="accent1"/>
+        </a:lnRef>
+        <a:fillRef idx="3">
+          <a:schemeClr val="accent1"/>
+        </a:fillRef>
+        <a:effectRef idx="2">
+          <a:schemeClr val="accent1"/>
+        </a:effectRef>
+        <a:fontRef idx="minor">
+          <a:schemeClr val="lt1"/>
+        </a:fontRef>
+      </a:style>
+    </a:spDef>
+    <a:lnDef>
+      <a:spPr/>
+      <a:bodyPr/>
+      <a:lstStyle/>
+      <a:style>
+        <a:lnRef idx="2">
+          <a:schemeClr val="accent1"/>
+        </a:lnRef>
+        <a:fillRef idx="0">
+          <a:schemeClr val="accent1"/>
+        </a:fillRef>
+        <a:effectRef idx="1">
+          <a:schemeClr val="accent1"/>
+        </a:effectRef>
+        <a:fontRef idx="minor">
+          <a:schemeClr val="tx1"/>
+        </a:fontRef>
+      </a:style>
+    </a:lnDef>
+  </a:objectDefaults>
+  <a:extraClrSchemeLst/>
+</a:theme>`
+
+const TEMPLATE__RELS_DOT_RELS = `<?xml version="1.0" encoding="UTF-8"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>
+  <Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/>
+  <Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties" Target="docProps/app.xml"/>
+</Relationships>`
+
+VARIABLES
+
+var HSLModel = color.ModelFunc(hslModel)
+    HSLModel converts any color.Color to a HSL color.
+
+FUNCTIONS
+
+func FileToSlice(path string) ([][][]string, error)
+    A convenient wrapper around File.ToSlice, FileToSlice will return the
+    raw data contained in an Excel XLSX file as three dimensional slice. The
+    first index represents the sheet number, the second the row number, and
+    the third the cell number.
+
+    For example:
+
+	var mySlice [][][]string
+	var value string
+	mySlice = xlsx.FileToSlice("myXLSX.xlsx")
+	value = mySlice[0][0][0]
+
+    Here, value would be set to the raw value of the cell A1 in the first
+    sheet in the XLSX file.
+
+func HSLToRGB(h, s, l float64) (r, g, b uint8)
+    HSLToRGB converts an HSL triple to a RGB triple.
+
+    Ported from http://goo.gl/Vg1h9
+
+func MakeDefaultContentTypes() (types xlsxTypes)
+
+func RGBToHSL(r, g, b uint8) (h, s, l float64)
+    RGBToHSL converts an RGB triple to a HSL triple.
+
+    Ported from http://goo.gl/Vg1h9
+
+func SetDefaultFont(size int, name string)
+
+func TimeFromExcelTime(excelTime float64, date1904 bool) time.Time
+    Convert an excelTime representation (stored as a floating point number)
+    to a time.Time.
+
+TYPES
+
+type Alignment struct {
+    Horizontal   string
+    Indent       int
+    ShrinkToFit  bool
+    TextRotation int
+    Vertical     string
+    WrapText     bool
+}
+
+func DefaultAlignment() *Alignment
+
+type Border struct {
+    Left        string
+    LeftColor   string
+    Right       string
+    RightColor  string
+    Top         string
+    TopColor    string
+    Bottom      string
+    BottomColor string
+}
+    Border is a high level structure intended to provide user access to the
+    contents of Border Style within an Sheet.
+
+func DefaultBorder() *Border
+
+func NewBorder(left, right, top, bottom string) *Border
+
+type Cell struct {
+    Row   *Row
+    Value string
+
+    NumFmt string
+
+    Hidden bool
+    HMerge int
+    VMerge int
+    // contains filtered or unexported fields
+}
+    Cell is a high level structure intended to provide user access to the
+    contents of Cell within an xlsx.Row.
+
+func NewCell(r *Row) *Cell
+    NewCell creates a cell and adds it to a row.
+
+func (c *Cell) Bool() bool
+    Bool returns a boolean from a cell's value. TODO: Determine if the
+    current return value is appropriate for types other than CellTypeBool.
+
+func (c *Cell) Float() (float64, error)
+    Float returns the value of cell as a number.
+
+func (c *Cell) FormattedValue() string
+    FormattedValue returns the formatted version of the value. If it's a
+    string type, c.Value will just be returned. Otherwise, it will attempt
+    to apply Excel formatting to the value.
+
+func (c *Cell) Formula() string
+    Formula returns the formula string for the cell.
+
+func (c *Cell) GetNumberFormat() string
+    GetNumberFormat returns the number format string for a cell.
+
+func (c *Cell) GetStyle() *Style
+    GetStyle returns the Style associated with a Cell
+
+func (c *Cell) Int() (int, error)
+    Int returns the value of cell as integer. Has max 53 bits of precision
+    See: float64(int64(math.MaxInt))
+
+func (c *Cell) Int64() (int64, error)
+    Int64 returns the value of cell as 64-bit integer.
+
+func (c *Cell) Merge(hcells, vcells int)
+    Merge with other cells, horizontally and/or vertically.
+
+func (c *Cell) SafeFormattedValue() (string, error)
+    SafeFormattedValue returns a value, and possibly an error condition from
+    a Cell. If it is possible to apply a format to the cell value, it will
+    do so, if not then an error will be returned, along with the raw value
+    of the Cell.
+
+func (c *Cell) SetBool(b bool)
+    SetBool sets a cell's value to a boolean.
+
+func (c *Cell) SetDate(t time.Time)
+    SetDate sets the value of a cell to a float.
+
+func (c *Cell) SetDateTime(t time.Time)
+
+func (c *Cell) SetDateTimeWithFormat(n float64, format string)
+
+func (c *Cell) SetFloat(n float64)
+    SetFloat sets the value of a cell to a float.
+
+func (c *Cell) SetFloatWithFormat(n float64, format string)
+    SetFloatWithFormat sets the value of a cell to a float and applies
+    formatting to the cell.
+
+func (c *Cell) SetFormula(formula string)
+    SetFormula sets the format string for a cell.
+
+func (c *Cell) SetInt(n int)
+    SetInt sets a cell's value to an integer.
+
+func (c *Cell) SetInt64(n int64)
+    SetInt64 sets a cell's value to a 64-bit integer.
+
+func (c *Cell) SetString(s string)
+    SetString sets the value of a cell to a string.
+
+func (c *Cell) SetStyle(style *Style)
+    SetStyle sets the style of a cell.
+
+func (c *Cell) SetValue(n interface{})
+    SetInt sets a cell's value to an integer.
+
+func (c *Cell) String() string
+    String returns the value of a Cell as a string.
+
+func (c *Cell) Type() CellType
+    Type returns the CellType of a cell. See CellType constants for more
+    details.
+
+type CellInterface interface {
+    String() string
+    FormattedValue() string
+}
+    CellInterface defines the public API of the Cell.
+
+type CellType int
+    CellType is an int type for storing metadata about the data type in the
+    cell.
+
+const (
+    CellTypeString CellType = iota
+    CellTypeFormula
+    CellTypeNumeric
+    CellTypeBool
+    CellTypeInline
+    CellTypeError
+    CellTypeDate
+    CellTypeGeneral
+)
+    Known types for cell values.
+
+type Col struct {
+    Min       int
+    Max       int
+    Hidden    bool
+    Width     float64
+    Collapsed bool
+    // contains filtered or unexported fields
+}
+
+func (c *Col) GetStyle() *Style
+    GetStyle returns the Style associated with a Col
+
+func (c *Col) SetStyle(style *Style)
+    SetStyle sets the style of a Col
+
+func (c *Col) SetType(cellType CellType)
+
+type File struct {
+    Date1904 bool
+
+    Sheets []*Sheet
+    Sheet  map[string]*Sheet
+
+    DefinedNames []*xlsxDefinedName
+    // contains filtered or unexported fields
+}
+    File is a high level structure providing a slice of Sheet structs to the
+    user.
+
+func NewFile() (file *File)
+    Create a new File
+
+func OpenBinary(bs []byte) (file *File, err error)
+    OpenBinary() take bytes of an XLSX file and returns a populated
+    xlsx.File struct for it.
+
+func OpenFile(filename string) (file *File, err error)
+    OpenFile() take the name of an XLSX file and returns a populated
+    xlsx.File struct for it.
+
+func OpenReaderAt(r io.ReaderAt, size int64) (file *File, err error)
+    OpenReaderAt() take io.ReaderAt of an XLSX file and returns a populated
+    xlsx.File struct for it.
+
+func ReadZip(f *zip.ReadCloser) (*File, error)
+    ReadZip() takes a pointer to a zip.ReadCloser and returns a xlsx.File
+    struct populated with its contents. In most cases ReadZip is not used
+    directly, but is called internally by OpenFile.
+
+func ReadZipReader(r *zip.Reader) (*File, error)
+    ReadZipReader() can be used to read an XLSX in memory without touching
+    the filesystem.
+
+func (f *File) AddSheet(sheetName string) (sheet *Sheet, err error)
+    Add a new Sheet, with the provided name, to a File
+
+func (f *File) MarshallParts() (map[string]string, error)
+    Construct a map of file name to XML content representing the file in
+    terms of the structure of an XLSX file.
+
+func (f *File) Save(path string) (err error)
+    Save the File to an xlsx file at the provided path.
+
+func (file *File) ToSlice() (output [][][]string, err error)
+    Return the raw data contained in the File as three dimensional slice.
+    The first index represents the sheet number, the second the row number,
+    and the third the cell number.
+
+    For example:
+
+	var mySlice [][][]string
+	var value string
+	mySlice = xlsx.FileToSlice("myXLSX.xlsx")
+	value = mySlice[0][0][0]
+
+    Here, value would be set to the raw value of the cell A1 in the first
+    sheet in the XLSX file.
+
+func (f *File) Write(writer io.Writer) (err error)
+    Write the File to io.Writer as xlsx
+
+type Fill struct {
+    PatternType string
+    BgColor     string
+    FgColor     string
+}
+    Fill is a high level structure intended to provide user access to the
+    contents of background and foreground color index within an Sheet.
+
+func DefaultFill() *Fill
+
+func NewFill(patternType, fgColor, bgColor string) *Fill
+
+type Font struct {
+    Size      int
+    Name      string
+    Family    int
+    Charset   int
+    Color     string
+    Bold      bool
+    Italic    bool
+    Underline bool
+}
+
+func DefaultFont() *Font
+
+func NewFont(size int, name string) *Font
+
+type HSL struct {
+    H, S, L float64
+}
+    HSL represents a cylindrical coordinate of points in an RGB color model.
+
+    Values are in the range 0 to 1.
+
+func (c HSL) RGBA() (uint32, uint32, uint32, uint32)
+    RGBA returns the alpha-premultiplied red, green, blue and alpha values
+    for the HSL.
+
+type Pane struct {
+    XSplit      float64
+    YSplit      float64
+    TopLeftCell string
+    ActivePane  string
+    State       string // Either "split" or "frozen"
+}
+
+type RefTable struct {
+    // contains filtered or unexported fields
+}
+
+func MakeSharedStringRefTable(source *xlsxSST) *RefTable
+    MakeSharedStringRefTable() takes an xlsxSST struct and converts it's
+    contents to an slice of strings used to refer to string values by
+    numeric index - this is the model used within XLSX worksheet (a numeric
+    reference is stored to a shared cell value).
+
+func NewSharedStringRefTable() *RefTable
+    NewSharedStringRefTable() creates a new, empty RefTable.
+
+func (rt *RefTable) AddString(str string) int
+    AddString adds a string to the reference table and return it's numeric
+    index. If the string already exists then it simply returns the existing
+    index.
+
+func (rt *RefTable) Length() int
+
+func (rt *RefTable) ResolveSharedString(index int) string
+    Resolvesharedstring() looks up a string value by numeric index from a
+    provided reference table (just a slice of strings in the correct order).
+    This function only exists to provide clarity or purpose via it's name.
+
+type Row struct {
+    Cells  []*Cell
+    Hidden bool
+    Sheet  *Sheet
+    Height float64
+    // contains filtered or unexported fields
+}
+
+func (r *Row) AddCell() *Cell
+
+func (r *Row) SetHeightCM(ht float64)
+
+func (r *Row) WriteSlice(e interface{}, cols int) int
+    Writes an array to row r. Accepts a pointer to array type 'e', and
+    writes the number of columns to write, 'cols'. If 'cols' is < 0, the
+    entire array will be written if possible. Returns -1 if the 'e' doesn't
+    point to an array, otherwise the number of columns written.
+
+func (r *Row) WriteStruct(e interface{}, cols int) int
+    Writes a struct to row r. Accepts a pointer to struct type 'e', and the
+    number of columns to write, `cols`. If 'cols' is < 0, the entire struct
+    will be written if possible. Returns -1 if the 'e' doesn't point to a
+    struct, otherwise the number of columns written
+
+type Sheet struct {
+    Name        string
+    File        *File
+    Rows        []*Row
+    Cols        []*Col
+    MaxRow      int
+    MaxCol      int
+    Hidden      bool
+    Selected    bool
+    SheetViews  []SheetView
+    SheetFormat SheetFormat
+}
+    Sheet is a high level structure intended to provide user access to the
+    contents of a particular sheet within an XLSX file.
+
+func (s *Sheet) AddRow() *Row
+    Add a new Row to a Sheet
+
+func (sh *Sheet) Cell(row, col int) *Cell
+    Get a Cell by passing it's cartesian coordinates (zero based) as row and
+    column integer indexes.
+
+    For example:
+
+	cell := sheet.Cell(0,0)
+
+    ... would set the variable "cell" to contain a Cell struct containing
+    the data from the field "A1" on the spreadsheet.
+
+func (s *Sheet) Col(idx int) *Col
+    Make sure we always have as many Cols as we do cells.
+
+func (s *Sheet) SetColWidth(startcol, endcol int, width float64) error
+    Set the width of a single column or multiple columns.
+
+type SheetFormat struct {
+    DefaultColWidth  float64
+    DefaultRowHeight float64
+}
+
+type SheetView struct {
+    Pane *Pane
+}
+
+type Style struct {
+    Border         Border
+    Fill           Fill
+    Font           Font
+    ApplyBorder    bool
+    ApplyFill      bool
+    ApplyFont      bool
+    ApplyAlignment bool
+    Alignment      Alignment
+}
+    Style is a high level structure intended to provide user access to the
+    contents of Style within an XLSX file.
+
+func NewStyle() *Style
+    Return a new Style structure initialised with the default values.
+
+type WorkBookRels map[string]string
+
+func (w *WorkBookRels) MakeXLSXWorkbookRels() xlsxWorkbookRels
+
+type XLSXReaderError struct {
+    Err string
+}
+    XLSXReaderError is the standard error type for otherwise undefined
+    errors in the XSLX reading process.
+
+func (e *XLSXReaderError) Error() string
+    Error returns a string value from an XLSXReaderError struct in order
+    that it might comply with the builtin.error interface.
+
+SUBDIRECTORIES
+
+	testdocs
+
