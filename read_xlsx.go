@@ -4,17 +4,24 @@ import (
   "fmt"
   // "bytes"
   "github.com/tealeg/xlsx"
-  "github.com/wiggitywalt/xlsx_read/models"
-  "github.com/wiggitywalt/xlsx_read/mongoService"
-  "github.com/wiggitywalt/xlsx_read/rostrService"
+  "./models"
+  "./mongoService"
+  "./rostrService"
   "strings"
   // "sync"
-)
+ )
 
 func main() {
   // var wg sync.WaitGroup
-  excelFileName := "project_actuals_01.xlsx"
-  xlFile, err := xlsx.OpenFile(excelFileName)
+
+  //excelFileName := "project_actuals_01.xlsx"
+  projectsFileName := "projects_wbs.xlsx"
+  xlFile, err := xlsx.OpenFile(projectsFileName)
+
+  //deleteAllPersons()
+  //deleteAllPersonProjects()
+  //deleteAllProjects()
+  //fmt.Println("Ok, func to remove all persons AND! personprojects AND! projects has been called. ")
 
   if err != nil {
     fmt.Println("error!")
@@ -26,11 +33,13 @@ func main() {
   //Sheet 1 has project info
 
   for idx, sheet := range xlFile.Sheets {
-    if idx == 1{
-      for idx, row := range sheet.Rows {
-        if idx > 0{
+    //This index denotes which sheet within the xlsx file to reference.
+    if idx == 0{
+      for _, row := range sheet.Rows {
+            //insertProject here
+          insertProjectRecord(row.Cells[0].String(), row.Cells[1].String(),row.Cells[2].String(), row.Cells[3].String(), row.Cells[4].String() )
+          fmt.Println("Cost Center", row.Cells[0], "CC Name", row.Cells[1],"CC Owner", row.Cells[2],"WBS Name", row.Cells[3],"WBS Number", row.Cells[4])
 
-          fmt.Println("0", row.Cells[0], "1", row.Cells[1],"2", row.Cells[2],"3", row.Cells[3],"4", row.Cells[4],"5",row.Cells[5] )
           // if row.Cells[8].String() != "Employee"{
             // var thisuser = findAPerson(row.Cells[8].String())
             // var wbs = row.Cells[3].String()
@@ -39,7 +48,6 @@ func main() {
             //userid string, wbs string, startdate time.Time
             // fmt.Println(findAPerson(row.Cells[8].String()), row.Cells[3].String(), row.Cells[13].String())
           // }
-        }
 
         // for idx, cell := range row.Cells {
         //   fmt.Println(cell)
@@ -109,6 +117,28 @@ func main() {
 //   wg.Done()
 // }
 
+//the DELETE funcs
+func deleteAllProjects(){
+  session := mongoService.CreateMongoSession()
+  defer session.Close()
+  models.RemoveAllProjects(session)
+}
+
+func deleteAllPersonProjects(){
+  session := mongoService.CreateMongoSession()
+  defer session.Close()
+  models.RemoveAllPersonProjects(session)
+}
+
+func deleteAllPersons(){
+  session := mongoService.CreateMongoSession()
+  defer session.Close()
+  models.RemoveAllPersons(session)
+}
+//END, the DELETE funcs
+
+
+//helper funcs
 func findAPerson(username string) string {
     session := mongoService.CreateMongoSession()
     defer session.Close()
@@ -138,6 +168,7 @@ func removeDuplicates(elements []string) []string {
   return result
 }
 
+//END, helper funcs
 func insertPersonProject(myid string, wbs string, startdate string){
   session := mongoService.CreateMongoSession()
   defer session.Close()
@@ -152,10 +183,15 @@ func insertPersonRecord(person_name string){
   models.AddPerson(session, models.Person{Name:person_name})
 }
 
-func insertProjectRecord(wbs string, project_name string){
+func insertProjectRecord(costcenter string, ccname string, ccowner string, wbsname string, wbs string){
+  //CostCenter string
+  //CCName string
+  //CCOwner string
+  //WBSName string
+  //WBS string
   session := mongoService.CreateMongoSession()
   defer session.Close()
-  models.AddProject(session, models.Project{WBS: wbs, Name:project_name})
+  models.AddProject(session, models.Project{CostCenter: costcenter, CCName: ccname, CCOwner: ccowner, WBSName:wbsname, WBS: wbs})
 }
 
 func getRostrInfoByEmp(emp string) []byte {

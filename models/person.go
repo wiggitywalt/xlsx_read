@@ -31,11 +31,20 @@ func GetPersons(session *mgo.Session) []Person {
 	return results
 }
 
+
 func GetPerson(session *mgo.Session, name string) Person{
-result := Person{}
+	result := Person{}
 	err := session.DB("dev_skills").C("persons").Find(bson.M{"name": name}).Select(bson.M{"name": 0}).One(&result)
 	if err != nil {
 		panic(err)
 	}
-  return result
+	return result
+}
+
+func RemoveAllPersons(session *mgo.Session){
+	_, err := session.DB("dev_skills").C("persons").RemoveAll(bson.M{})
+	if err != nil{
+		panic(err)
+	}
+
 }

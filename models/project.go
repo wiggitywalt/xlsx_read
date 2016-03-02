@@ -9,8 +9,11 @@ import (
 
 
 type Project struct {
+	CostCenter string
+	CCName string
+	CCOwner string
+	WBSName string
 	WBS string
-	Name string
 	ID        bson.ObjectId `bson:"_id,omitempty"`
 }
 
@@ -33,4 +36,12 @@ func GetProjects(session *mgo.Session) []Project{
 		panic(err)
 	}
 	return results
+}
+
+func RemoveAllProjects(session *mgo.Session){
+	_, err := session.DB("dev_skills").C("projects").RemoveAll(bson.M{})
+	if err != nil{
+		panic(err)
+	}
+	fmt.Println("Ok, all projects have been removed.")
 }

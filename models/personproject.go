@@ -35,3 +35,10 @@ func GetPersonProjects(session *mgo.Session) []Project{
 	}
 	return results
 }
+
+func RemoveAllPersonProjects(session *mgo.Session){
+	_, err := session.DB("dev_skills").C("personprojects").RemoveAll(bson.M{})
+	if err != nil{
+		panic(err)
+	}
+}
